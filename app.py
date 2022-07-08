@@ -7,7 +7,10 @@ from flask import Flask, request, jsonify, make_response
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 
-spring_server = 'http://'+ 'localhost' + ':8080'
+with open('ip.txt', 'r') as file:
+    ip = file.read()
+
+spring_server = 'http://' + ip + ':8080'
 uuid = 'bcec74a4-ea3f-4b78-a6ed-40f789643036'
 
 app = Flask(__name__)
@@ -54,8 +57,7 @@ def test():
 
 @app.route('/test2', methods=['POST'])
 def test2():
-
-    time.sleep(random.uniform(1,3))
+    time.sleep(random.uniform(1, 3))
 
     uuid = request.form['uuid']
     print(uuid)
