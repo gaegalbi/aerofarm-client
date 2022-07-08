@@ -8,7 +8,7 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 
 spring_server = 'http://'+ 'localhost' + ':8080'
-
+uuid = 'bcec74a4-ea3f-4b78-a6ed-40f789643036'
 
 app = Flask(__name__)
 
@@ -20,7 +20,7 @@ def send_ip_mac():
     s.close()
 
     data = {
-        "uuid": "대충UUID",
+        "uuid": uuid,
         "ipAddress": ip_address,
         "macAddress": getmac.get_mac_address()
     }
