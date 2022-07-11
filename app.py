@@ -1,17 +1,19 @@
 import datetime
 import random
-import time
 import socket
 import getmac
 from flask import Flask, request, jsonify, make_response
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
+import serial
 
 with open('ip.txt', 'r') as file:
     ip = file.read()
 
 spring_server = 'http://' + ip + ':8080'
+print(spring_server)
 uuid = 'bcec74a4-ea3f-4b78-a6ed-40f789643036'
+arduino = serial.Serial('/dev/cu.usbmodem101', 9600)
 
 app = Flask(__name__)
 
@@ -29,12 +31,12 @@ def send_ip_mac():
     }
 
     headers = {'Content-Type': 'application/json; charset=utf-8'}
-    requests.post(spring_server + '/test', json=data, headers=headers)
+    requests.post(spring_server + '/api/devices/update', json=data, headers=headers)
 
 
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(func=send_ip_mac, trigger="interval", day=1, next_run_time=datetime.datetime.now())
-# scheduler.start()
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=send_ip_mac, trigger="interval", days=1, next_run_time=datetime.datetime.now())
+scheduler.start()
 
 
 @app.route('/')
@@ -48,19 +50,22 @@ def hello_world():  # put application's code here
 
 @app.route('/test', methods=['POST'])
 def test():
-    print(request.is_json)
+
     params = request.get_json()
     print(params)
+
+    if params['ledOn']:
+        arduino.write(b"led_on")
+    else:
+        arduino.write(b"led_off")
 
     return make_response('', 200)
 
 
 @app.route('/test2', methods=['POST'])
 def test2():
-    time.sleep(random.uniform(1, 3))
-
-    uuid = request.form['uuid']
-    print(uuid)
+    reqeust_uuid = request.form['uuid']
+    print(reqeust_uuid)
 
     data = {
         'online': bool(random.getrandbits(1)),
@@ -74,4 +79,7 @@ def test2():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(
+        host='0.0.0.0',
+        port=5111
+    )
