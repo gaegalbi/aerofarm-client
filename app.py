@@ -1,5 +1,4 @@
 import datetime
-import random
 import socket
 import getmac
 from flask import Flask, request, jsonify, make_response
@@ -71,21 +70,22 @@ def device_setting():
 @app.route('/device-info', methods=['POST'])
 def device_info():
     reqeust_uuid = request.form['uuid']
-    print(reqeust_uuid)
+    if reqeust_uuid != uuid:
+        return make_response('', 400)
 
     arduino.write(b"read_value")
     res = arduino.readline()
-    json_data = json.loads(res)
 
-    data = {
-        'online': bool(random.getrandbits(1)),
-        'temperature': random.randint(20, 40),
-        'humidity': random.randint(0, 100),
-        'brightness': random.randint(0, 100),
-        'fertilizer': random.randint(0, 1000)
-    }
+    # data = {
+    #     'online': bool(random.getrandbits(1)),
+    #     'temperature': random.randint(20, 40),
+    #     'humidity': random.randint(0, 100),
+    #     'brightness': random.randint(0, 100),
+    #     'fertilizer': random.randint(0, 1000)
+    # }
+    data = json.loads(res)
 
-    return make_response(jsonify(json_data), 200)
+    return make_response(jsonify(data), 200)
 
 
 if __name__ == '__main__':
