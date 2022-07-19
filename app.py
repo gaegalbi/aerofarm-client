@@ -12,8 +12,13 @@ with open('ip.txt', 'r') as file:
 
 spring_server = 'http://' + ip + ':8080'
 print(spring_server)
-uuid = 'bcec74a4-ea3f-4b78-a6ed-40f789643036'
-arduino = serial.Serial('/dev/cu.usbmodem101', 9600)
+# uuid = '2add5557-d6e2-4fb8-94eb-da182db84036'  # AWS MARIA
+uuid = 'bcec74a4-ea3f-4b78-a6ed-40f789643036'  # LOCAL TEST
+
+try:
+    arduino = serial.Serial('/dev/ttyACM0', 9600)
+except FileNotFoundError as e:
+    arduino = serial.Serial('/dev/ttyACM1', 9600)
 
 app = Flask(__name__)
 
@@ -21,7 +26,8 @@ app = Flask(__name__)
 def send_ip_mac():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
-    ip_address = s.getsockname()[0]
+    ip_address = s.getsockname()[0]  # 공유기로 연결됬다면 공인 아이피 주소의 입력이 필요함
+    # ip_address = requests.get("https://api.ipify.org").text # 외부 아이피 주소 가져오기
     s.close()
 
     data = {
@@ -48,9 +54,8 @@ def hello_world():  # put application's code here
     return make_response(jsonify(row), 200)
 
 
-@app.route('/test', methods=['POST'])
+@app.route('/device-setting', methods=['POST'])
 def test():
-
     params = request.get_json()
     print(params)
 
@@ -62,10 +67,14 @@ def test():
     return make_response('', 200)
 
 
-@app.route('/test2', methods=['POST'])
+@app.route('/device-info', methods=['POST'])
 def test2():
     reqeust_uuid = request.form['uuid']
     print(reqeust_uuid)
+    arduino.write(b"read_value")
+
+    res = arduino.readline()
+    print(res.decode())
 
     data = {
         'online': bool(random.getrandbits(1)),
