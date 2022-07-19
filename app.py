@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify, make_response
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 import serial
+import json
 
 with open('ip.txt', 'r') as file:
     ip = file.read()
@@ -17,7 +18,7 @@ uuid = 'bcec74a4-ea3f-4b78-a6ed-40f789643036'  # LOCAL TEST
 
 try:
     arduino = serial.Serial('/dev/ttyACM0', 9600)
-except FileNotFoundError as e:
+except serial.SerialException:
     arduino = serial.Serial('/dev/ttyACM1', 9600)
 
 app = Flask(__name__)
@@ -55,7 +56,7 @@ def hello_world():  # put application's code here
 
 
 @app.route('/device-setting', methods=['POST'])
-def test():
+def device_setting():
     params = request.get_json()
     print(params)
 
@@ -68,13 +69,13 @@ def test():
 
 
 @app.route('/device-info', methods=['POST'])
-def test2():
+def device_info():
     reqeust_uuid = request.form['uuid']
     print(reqeust_uuid)
-    arduino.write(b"read_value")
 
+    arduino.write(b"read_value")
     res = arduino.readline()
-    print(res.decode())
+    json_data = json.loads(res)
 
     data = {
         'online': bool(random.getrandbits(1)),
@@ -84,7 +85,7 @@ def test2():
         'fertilizer': random.randint(0, 1000)
     }
 
-    return make_response(jsonify(data), 200)
+    return make_response(jsonify(json_data), 200)
 
 
 if __name__ == '__main__':
