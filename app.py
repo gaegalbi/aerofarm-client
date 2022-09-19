@@ -6,6 +6,7 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 import serial
 import json
+import time
 
 with open('ip.txt', 'r') as file:
     ip = file.read()
@@ -63,6 +64,13 @@ def device_setting():
         arduino.write(b"led_on")
     else:
         arduino.write(b"led_off")
+    time.sleep(0.5)
+
+    if params['fanOn']:
+        arduino.write(b"fan_on")
+    else:
+        arduino.write(b"fan_off")
+    time.sleep(0.5)
 
     return make_response('', 200)
 
