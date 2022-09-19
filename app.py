@@ -47,7 +47,7 @@ scheduler.start()
 
 
 def delay_input(delay_time=1):
-    time.sleep(delay_time)
+    time.sleep(0.2)
     arduino.flushInput()
     time.sleep(delay_time)
 
