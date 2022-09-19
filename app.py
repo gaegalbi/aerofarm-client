@@ -46,7 +46,7 @@ scheduler.add_job(func=send_ip_mac, trigger="interval", days=1, next_run_time=da
 scheduler.start()
 
 
-def delay_input(delay_time=0.2):
+def delay_input(delay_time=1):
     time.sleep(delay_time)
     arduino.flushInput()
     time.sleep(delay_time)
@@ -77,7 +77,6 @@ def device_setting():
         arduino.write(b"fan_on")
     else:
         arduino.write(b"fan_off")
-    time.sleep(0.5)
 
     return make_response('', 200)
 
