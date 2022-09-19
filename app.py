@@ -46,6 +46,12 @@ scheduler.add_job(func=send_ip_mac, trigger="interval", days=1, next_run_time=da
 scheduler.start()
 
 
+def delay_input(delay_time=0.2):
+    time.sleep(delay_time)
+    arduino.flushInput()
+    time.sleep(delay_time)
+
+
 @app.route('/')
 def hello_world():  # put application's code here
     response = requests.get(spring_server + '/test')
@@ -64,7 +70,8 @@ def device_setting():
         arduino.write(b"led_on")
     else:
         arduino.write(b"led_off")
-    time.sleep(0.5)
+
+    delay_input()
 
     if params['fanOn']:
         arduino.write(b"fan_on")
