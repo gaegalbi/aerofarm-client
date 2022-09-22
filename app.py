@@ -78,6 +78,13 @@ def device_setting():
     else:
         arduino.write(b"fan_off")
 
+    delay_input()
+
+    if params['pumpOn']:
+        arduino.write(b"pump_on")
+    else:
+        arduino.write(b"pump_off")
+
     return make_response('', 200)
 
 
