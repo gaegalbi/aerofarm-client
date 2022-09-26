@@ -24,6 +24,21 @@ except serial.SerialException:
 app = Flask(__name__)
 
 
+class WaterPumpOnOff:
+    def __init__(self):
+        self.water_pump_onoff = False
+        self.water_pump_interval = 10
+
+
+water_pump_onoff = WaterPumpOnOff()
+
+
+def delay_input(delay_time=1):
+    time.sleep(0.2)
+    arduino.flushInput()
+    time.sleep(delay_time)
+
+
 def send_ip_mac():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -41,15 +56,17 @@ def send_ip_mac():
     requests.post(spring_server + '/api/devices/update', json=data, headers=headers)
 
 
+def water_pump_operation():
+    if water_pump_onoff.water_pump_onoff:
+        arduino.write(b"pump_on")
+        delay_input(10)
+        arduino.write(b"pump_off")
+
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=send_ip_mac, trigger="interval", days=1, next_run_time=datetime.datetime.now())
+scheduler.add_job(func=water_pump_operation, trigger="interval", minutes=1, next_run_time=datetime.datetime.now())
 scheduler.start()
-
-
-def delay_input(delay_time=1):
-    time.sleep(0.2)
-    arduino.flushInput()
-    time.sleep(delay_time)
 
 
 @app.route('/')
@@ -81,9 +98,11 @@ def device_setting():
     delay_input()
 
     if params['pumpOn']:
-        arduino.write(b"pump_on")
+        # arduino.write(b"pump_on")
+        water_pump_onoff.water_pump_onoff = True
     else:
-        arduino.write(b"pump_off")
+        # arduino.write(b"pump_off")
+        water_pump_onoff.water_pump_onoff = False
 
     return make_response('', 200)
 
