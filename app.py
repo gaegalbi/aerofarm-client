@@ -65,7 +65,7 @@ def water_pump_operation():
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=send_ip_mac, trigger="interval", days=1, next_run_time=datetime.datetime.now())
-scheduler.add_job(func=water_pump_operation, trigger="interval", minutes=1, next_run_time=datetime.datetime.now())
+scheduler.add_job(func=water_pump_operation, trigger="interval", hours=1, next_run_time=datetime.datetime.now())
 scheduler.start()
 
 
